@@ -11,7 +11,7 @@ show(moony_1(ribbon)); //Q1
 
 function moony_2(n){
     
-    return n === 1 ? moony_1(circle)
+    return n === 1 ? circle
                    : moony_1(moony_2(n - 1));
 }
 
@@ -21,7 +21,7 @@ function moony_1_mod(bottom_right, n){
     
     const scaling_factor = 1 / n;
     
-    return beside_frac(scaling_factor), 
+    return beside_frac(scaling_factor, 
                        stack_frac(scaling_factor, circle, square),
                        stack_frac(scaling_factor, blank, bottom_right));
     
