@@ -13,12 +13,12 @@ function makeup_amount(x, coins) {
                 return null;
             } else {
                 // Combinations that do not use the head coin.
-                const combi_A = ...
+                const combi_A = makeup_amount(x, tail(coins));
                 // Combinations that do not use the head coin
                 // for the remaining amount.
-                const combi_B = ...
+                const combi_B = makeup_amount(x - head(coins), tail(coins));
                 // Combinations that use the head coin.
-                const combi_C = ...
+                const combi_C = map(xs => pair(head(coins), xs), combi_B);
         return append(combi_A, combi_C);
     }
 }
