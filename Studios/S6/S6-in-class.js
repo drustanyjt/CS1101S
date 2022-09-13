@@ -3,22 +3,43 @@ function my_map(f, xs){
 }
 
 function remove_duplicates(xs) {
-    return accumulate((p, q) => pair(p, filter(x => x !== p, q)), null, xs);
+    
+    return accumulate((p, q) => is_null(member(p, q))
+        ? pair(p, q)
+        : q, null, xs);
 }
 
-function makeup_amount(x, coins) {
-    if (x === 0) {
+// remove_duplicates(null);
+
+function subsets(xs) {
+    if (is_null(xs)) {
         return list(null);
-    } else if (x < 0 || is_null(coins)) {
-        return null;
-    } else {
-        // Combinations that do not use the head coin.
-        const combi_A = makeup_amount(x, tail(coins));
-        // Combinations that do not use the head coin
-        // for the remaining amount.
-        const combi_B = makeup_amount(x - head(coins), tail(coins));
-        // Combinations that use the head coin.
-        const combi_C = map(xs => pair(head(coins), xs), combi_B);
-        return append(combi_A, combi_C);
+    }
+    else {
+        const subset_tail = subsets(tail(xs));
+        
+        const subset_head = map(x => append(x, list(head(xs))), subset_tail);
+        
+        return append(subset_tail, subset_head);
     }
 }
+
+
+// display_list(subsets(list(1,2, 3, 4)));
+
+function permutations(xs) {
+    
+    if (is_null(xs)) {
+        return list(null);
+    }
+    else {
+         const perm_head = accumulate(append, null, map(x =>
+            map(p => pair(x, p), permutations(remove(x, xs))), xs));
+        
+        
+        return perm_head;
+    }
+}
+
+display_list(permutations(list(1,2,3)));
+
