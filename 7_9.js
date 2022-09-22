@@ -24,6 +24,7 @@ function compress(xs, res) {
 }
 compress(test, "doesnt matter");
 
+//Q9
 function pack(xs, res) {
     return accumulate((p, q) => !is_null(q)
         ? head(head(q)) === p
