@@ -14,7 +14,7 @@ map(i => ev3_connected(list_ref(motors, i))
     : display(list_ref(motor_names, i) + "not connected")
     , enum_list(0,3));
  
-// //the above is just to show what motors are connected
+//the above is just to show what motors are connected
 
 const stopAction = "brake";
 const speed = 1000;
