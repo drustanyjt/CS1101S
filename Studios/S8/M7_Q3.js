@@ -33,20 +33,7 @@ function turn(direction) {
     return null;
 }
 
-//move forward
-function roll_forward(dist){
-    ev3_speak("Rolling");
-    ev3_runToRelativePosition(mot_a, CM_IN_TURNS*dist, speed);
-    ev3_runToRelativePosition(mot_b, CM_IN_TURNS*dist, speed);
-    ev3_pause(300*dist);
-    return null;
-}
-
-roll_forward(10);
 turn(1);
-roll_forward(5);
-turn(-1);
-roll_forward(15);
 
 
 
