@@ -85,7 +85,6 @@ function roll_forward(dist){
 
 
 function light_intensity(){
-    const light_intensity_value = ev3_ambientLightIntensity(sensor_color);
     display("Setting speed");
     ev3_motorSetSpeed(mot_a, speed);
     ev3_motorSetSpeed(mot_b, speed);
@@ -98,7 +97,6 @@ function light_intensity(){
             display("stop");
             break;
         }
-        display(light_intensity_value);
         ev3_pause(1000);
         display(ev3_ambientLightIntensity(sensor_color));
     }
