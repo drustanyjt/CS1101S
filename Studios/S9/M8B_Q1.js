@@ -78,9 +78,9 @@ function roll_forward(dist){
 }
 
 // roll_forward(1);
-turn(1);
+// turn(1);
 // roll_forward(1);
-turn(-1);
+// turn(-1);
 // roll_forward(1);
 
 
@@ -95,10 +95,12 @@ function light_intensity(){
     while(button === 0){
         if (ev3_touchSensorPressed(touch_sensor)) {
             button = 1;
+            display("stop");
+            break;
         }
         display(light_intensity_value);
         ev3_pause(1000);
-        iter(display(ev3_ambientLightIntensity(sensor_color)));
+        display(ev3_ambientLightIntensity(sensor_color));
     }
 }
 
