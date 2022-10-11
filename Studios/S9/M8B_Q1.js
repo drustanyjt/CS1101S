@@ -91,7 +91,7 @@ function light_intensity(){
     
     let button = 0;
 
-    while(button === 0){
+    while (button === 0) {
         if (ev3_touchSensorPressed(touch_sensor)) {
             button = 1;
             display("stop");
