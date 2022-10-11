@@ -100,6 +100,7 @@ function light_intensity(){
         ev3_pause(1000);
         display(ev3_ambientLightIntensity(sensor_color));
     }
+    return "done!";
 }
 
 light_intensity();
