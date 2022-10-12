@@ -46,7 +46,7 @@ const WHITE = 6;
 const stopAction = "brake";
 const speed = 200;
 const time = 1500;
-const CM_IN_TURNS = -50;
+const CM_IN_TURNS = -27.6;
 
 const do_all = f => map(x => f(x), motors);
 const start_all = () => do_all(ev3_motorStart);
@@ -243,28 +243,36 @@ function move_until(speed, pred, doing){
 function main(){
     display("\n");
     ev3_speak("Hello! Starting the run.");
-    const compensation_dist = 1.2;
-    const compensation_turn = 10;
+    const compensation_dist = 4.5;
+    const compensation_turn = 1;
     // display(ev3_colorSensorGetColor(sensor_colour)); // COLOUR SENSOR
     // display(ev3_gyroSensorAngle(sensor_gyro)); // GYRO SENSOR
     
     while (ev3_colorSensorGetColor(sensor_colour) === BLACK) {
-        move_until(-200, () => ev3_colorSensorGetColor(sensor_colour) === WHITE,
+        move_until(-200, () => ev3_colorSensorGetColor(sensor_colour) === WHITE || ev3_touchSensorPressed(sensor_touch),
             () => null);
-        
+    
         roll_forward(compensation_dist);
+        if (ev3_touchSensorPressed(sensor_touch)) {
+            return "Manual cut";
+        }
         ev3_pause(5);
         turn_deg(-135);
+        
+        if (ev3_touchSensorPressed(sensor_touch)) {
+            return "Manual cut";
+        }
 
         turn_until(undefined, 1,
             () => ev3_colorSensorGetColor(sensor_colour) === BLACK || ev3_gyroSensorAngle(sensor_gyro) >= 270,
             () => null);
         
         ev3_speak("compensating");
+        
         turn_deg(compensation_turn);
     }
     
-    turn_deg(43);
+    turn_deg(45);
     
     while (ev3_colorSensorGetColor(sensor_colour) === BLACK) {
         move_until(-200, () => ev3_colorSensorGetColor(sensor_colour) === WHITE,
@@ -288,8 +296,8 @@ function main(){
     return 1;
 }
 
-
-roll_forward(10);
+main();
+// roll_forward(10);
 
 //Run code
 // ultrasonic_dist();
