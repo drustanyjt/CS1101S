@@ -10,24 +10,10 @@ map(i => ev3_connected(list_ref(motors, i))
     : display(list_ref(motor_names, i) + "not connected")
     , enum_list(0,3));
  
-function get_touchSensor(){
-    let res = undefined;
-    const possible_sensors = list(ev3_touchSensor1, ev3_touchSensor2, ev3_touchSensor3, ev3_touchSensor4);
-    function inner(xs){
-        if (is_undefined(res) && !is_null(xs)){
-            res = head(xs)();
-            inner(tail(xs));
-        } else {
-            return res;
-        }
-    }
-    return inner(possible_sensors);
-}
-
 const sensor_gyro = ev3_gyroSensor();
 const sensor_ultra = ev3_ultrasonicSensor();
 const sensor_colour = ev3_colorSensor();
-const sensor_touch = ev3_touchSensor3();
+const sensor_touch = ev3_touchSensor4();
 const sensors = list(sensor_gyro, sensor_ultra, sensor_colour, sensor_touch);
 const sensor_names = map(x =>"sensor_" + x + " ", list("gyro", "ultra", "colour", "touch"));
 
@@ -91,7 +77,7 @@ function start_move(speed){
 }
 
 function turn_deg(deg){ // positive deg for clockwise
-    ev3_speak("Turning");
+    // ev3_speak("Turning");
     
     const speed = 300; // turn speed
     
@@ -102,7 +88,7 @@ function turn_deg(deg){ // positive deg for clockwise
     ev3_gyroSensorRate(sensor_gyro);
     
     function iter(deg_turned){
-        if (sign * deg_turned >= sign * deg - (1 * speed / 70) || iter_cnt >= 10000){
+        if (sign * deg_turned >= sign * deg - (1 * speed / 70) || iter_cnt >= 10000 || ev3_touchSensorPressed(sensor_touch)){
             ev3_motorStop(mot_a);
             ev3_motorStop(mot_d);
             display("I turned ↓");
@@ -126,69 +112,11 @@ function turn_deg(deg){ // positive deg for clockwise
 }
 
 function roll_forward(dist){
-    ev3_speak("Rolling");
+    // ev3_speak("Rolling");
     ev3_runToRelativePosition(mot_a, CM_IN_TURNS*dist, speed);
     ev3_runToRelativePosition(mot_d, CM_IN_TURNS*dist, speed);
-    ev3_pause(500*math_abs(dist));
+    ev3_pause(350*math_abs(dist));
     return null;
-}
-
-
-function ultrasonic_dist(){
-    let dist_to_box = ev3_ultrasonicSensorDistance(sensor_ultra)/10;
-    display("Setting speed");
-    ev3_motorSetSpeed(mot_a, speed);
-    ev3_motorSetSpeed(mot_d, speed);
-
-    ev3_motorSetStopAction(mot_a, stopAction);
-    ev3_motorSetStopAction(mot_d, stopAction);
-    
-    display(dist_to_box);
-    ev3_motorStart(mot_a);
-    ev3_motorStart(mot_d);
-    
-
-    
-    ev3_pause(2000);
-    
-    function iter(dist){
-        if (dist <= 10){
-            ev3_motorStop(mot_a);
-            ev3_motorStop(mot_d);
-            function direction() {
-                return math_random() <= 0.5 ? -1 : 1;
-            }
-            
-            const dir = direction();
-            
-            function inner_iter(dir){
-                turn_deg(90*dir);
-                roll_forward(15);
-                turn_deg(-dir*90);
-                dist_to_box = ev3_ultrasonicSensorDistance(sensor_ultra)/10;
-                if (dist_to_box <= 10){
-                    return inner_iter(dir);
-                } else {
-                    turn_deg(90*dir);
-                    roll_forward(15);
-                    turn_deg(-dir*90);
-                    roll_forward(25);
-                    return null;
-                }
-            }
-            inner_iter(dir);
-        }
-        else {
-            ev3_pause(1000);
-            dist_to_box = ev3_ultrasonicSensorDistance(sensor_ultra)/10;
-            return iter(dist_to_box);
-        }
-    
-    }
-    
-
-    
-    return iter(dist_to_box);
 }
 
 function turn_until(speed, sign, pred, doing){
@@ -207,14 +135,13 @@ function turn_until(speed, sign, pred, doing){
     
     start_turn(speed, sign);
     
-
-    
-    while (!pred()) {
+    while (!pred() && !ev3_touchSensorPressed(sensor_touch)) {
         ev3_pause(1);
         doing();
     }
     
     stop_all();
+    return ev3_gyroSensorAngle(sensor_gyro);
     
 }
 
@@ -232,7 +159,7 @@ function move_until(speed, pred, doing){
     
     start_move(speed);
     
-    while (!pred()) {
+    while (!pred() && !ev3_touchSensorPressed(sensor_touch)) {
         ev3_pause(1);
         doing();
     }
@@ -243,8 +170,8 @@ function move_until(speed, pred, doing){
 function main(){
     display("\n");
     ev3_speak("Hello! Starting the run.");
-    const compensation_dist = 4.5;
-    const compensation_turn = 1;
+    const compensation_dist = 5;
+    let compensation_turn = 5;
     // display(ev3_colorSensorGetColor(sensor_colour)); // COLOUR SENSOR
     // display(ev3_gyroSensorAngle(sensor_gyro)); // GYRO SENSOR
     
@@ -253,9 +180,11 @@ function main(){
             () => null);
     
         roll_forward(compensation_dist);
+        
         if (ev3_touchSensorPressed(sensor_touch)) {
-            return "Manual cut";
+            break;
         }
+        
         ev3_pause(5);
         turn_deg(-135);
 
@@ -263,18 +192,36 @@ function main(){
             () => ev3_colorSensorGetColor(sensor_colour) === BLACK || ev3_gyroSensorAngle(sensor_gyro) >= 270,
             () => null);
         
+        // compensation_turn = turn_until(undefined, 1,
+        //     () => ev3_colorSensorGetColor(sensor_colour) === WHITE || ev3_gyroSensorAngle(sensor_gyro) >= 270,
+        //     () => null);
+        
         ev3_speak("compensating");
         
         turn_deg(compensation_turn);
+        ev3_speak("stopped turning");
     }
-    
-    turn_deg(45);
-    
+    if (ev3_touchSensorPressed(sensor_touch)) {
+        return 2;
+    }
+    turn_deg(45 - compensation_turn);
+    if (ev3_touchSensorPressed(sensor_touch)) {
+        return 3;
+    }
     while (ev3_colorSensorGetColor(sensor_colour) === BLACK) {
         move_until(-200, () => ev3_colorSensorGetColor(sensor_colour) === WHITE,
             () => null);
         
+        if (ev3_touchSensorPressed(sensor_touch)) {
+            break;
+        }
+        
         roll_forward(compensation_dist);
+        
+        if (ev3_touchSensorPressed(sensor_touch)) {
+            break;
+        }
+        
         ev3_pause(5);
         turn_deg(-135);
 
@@ -291,10 +238,9 @@ function main(){
     display("\n");
     return 1;
 }
-
+// roll_forward(-20);
 main();
 // roll_forward(10);
-
 //Run code
 // ultrasonic_dist();
 
