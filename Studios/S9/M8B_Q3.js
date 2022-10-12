@@ -141,6 +141,7 @@ function turn_until(speed, sign, pred, doing){
     }
     
     stop_all();
+    ev3_pause(100);
     return ev3_gyroSensorAngle(sensor_gyro);
     
 }
@@ -165,16 +166,18 @@ function move_until(speed, pred, doing){
     }
     
     stop_all();
+    ev3_pause(100);
 }
 
 function main(){
     display("\n");
     ev3_speak("Hello! Starting the run.");
-    const compensation_dist = 5;
+    const compensation_dist = 4;
     let compensation_turn = 5;
     // display(ev3_colorSensorGetColor(sensor_colour)); // COLOUR SENSOR
     // display(ev3_gyroSensorAngle(sensor_gyro)); // GYRO SENSOR
     
+    // begin forward run
     while (ev3_colorSensorGetColor(sensor_colour) === BLACK) {
         move_until(-200, () => ev3_colorSensorGetColor(sensor_colour) === WHITE,
             () => null);
@@ -192,22 +195,27 @@ function main(){
             () => ev3_colorSensorGetColor(sensor_colour) === BLACK || ev3_gyroSensorAngle(sensor_gyro) >= 270,
             () => null);
         
-        // compensation_turn = turn_until(undefined, 1,
-        //     () => ev3_colorSensorGetColor(sensor_colour) === WHITE || ev3_gyroSensorAngle(sensor_gyro) >= 270,
-        //     () => null);
         
         ev3_speak("compensating");
         
         turn_deg(compensation_turn);
         ev3_speak("stopped turning");
     }
+    
+    //turn to find backward direction
     if (ev3_touchSensorPressed(sensor_touch)) {
         return 2;
     }
-    turn_deg(45 - compensation_turn);
+    turn_until(undefined, 1,
+        () => ev3_colorSensorGetColor(sensor_colour) === BLACK || ev3_gyroSensorAngle(sensor_gyro) >= 270,
+        () => null);
+    turn_deg(compensation_turn);
     if (ev3_touchSensorPressed(sensor_touch)) {
         return 3;
+        
+        
     }
+    // begin back run
     while (ev3_colorSensorGetColor(sensor_colour) === BLACK) {
         move_until(-200, () => ev3_colorSensorGetColor(sensor_colour) === WHITE,
             () => null);
@@ -238,21 +246,5 @@ function main(){
     display("\n");
     return 1;
 }
-// roll_forward(-20);
-main();
-// roll_forward(10);
-//Run code
-// ultrasonic_dist();
 
-// roll_forward(15);
-// ev3_motorSetSpeed(mot_a, speed);
-// ev3_motorSetSpeed(mot_d, speed);
-// ev3_motorSetStopAction(mot_a, stopAction);
-// ev3_motorSetStopAction(mot_d, stopAction);
-// ev3_motorStart(mot_a);
-// ev3_motorStart(mot_d);
-// ev3_pause(4000);
-// ev3_motorStop(mot_a);
-// ev3_motorStop(mot_d);
-// ev3_gyroSensorRate(sensor_gyro);
-// ev3_gyroSensorAngle(sensor_gyro);
+main();
