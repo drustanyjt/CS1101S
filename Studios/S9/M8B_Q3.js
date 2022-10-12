@@ -46,7 +46,7 @@ const WHITE = 6;
 const stopAction = "brake";
 const speed = 200;
 const time = 1500;
-const CM_IN_TURNS = -90;
+const CM_IN_TURNS = -50;
 
 const do_all = f => map(x => f(x), motors);
 const start_all = () => do_all(ev3_motorStart);
@@ -129,7 +129,7 @@ function roll_forward(dist){
     ev3_speak("Rolling");
     ev3_runToRelativePosition(mot_a, CM_IN_TURNS*dist, speed);
     ev3_runToRelativePosition(mot_d, CM_IN_TURNS*dist, speed);
-    ev3_pause(300*dist);
+    ev3_pause(500*math_abs(dist));
     return null;
 }
 
@@ -243,7 +243,8 @@ function move_until(speed, pred, doing){
 function main(){
     display("\n");
     ev3_speak("Hello! Starting the run.");
-    
+    const compensation_dist = 1.2;
+    const compensation_turn = 10;
     // display(ev3_colorSensorGetColor(sensor_colour)); // COLOUR SENSOR
     // display(ev3_gyroSensorAngle(sensor_gyro)); // GYRO SENSOR
     
@@ -251,7 +252,7 @@ function main(){
         move_until(-200, () => ev3_colorSensorGetColor(sensor_colour) === WHITE,
             () => null);
         
-        roll_forward(0.2);
+        roll_forward(compensation_dist);
         ev3_pause(5);
         turn_deg(-135);
 
@@ -260,27 +261,26 @@ function main(){
             () => null);
         
         ev3_speak("compensating");
-        turn_deg(10);
+        turn_deg(compensation_turn);
     }
     
-
-
-    // turn_deg(180);
-    // ev3_pause(1);
-    // set_speed_all(500);
-    // set_stop_all("brake");
-    // start_all();
-    // ev3_pause(1000);
-    // stop_all();
+    turn_deg(43);
     
-    // turn_deg(180);
-    // set_speed_all(500);
-    // set_stop_all("brake");
-    // start_all();
-    // ev3_pause(1000);
-    // stop_all();
-    
-    // display(ev3_colorSensorGetColor(sensor_colour));
+    while (ev3_colorSensorGetColor(sensor_colour) === BLACK) {
+        move_until(-200, () => ev3_colorSensorGetColor(sensor_colour) === WHITE,
+            () => null);
+        
+        roll_forward(compensation_dist);
+        ev3_pause(5);
+        turn_deg(-135);
+
+        turn_until(undefined, 1,
+            () => ev3_colorSensorGetColor(sensor_colour) === BLACK || ev3_gyroSensorAngle(sensor_gyro) >= 270,
+            () => null);
+        
+        ev3_speak("compensating");
+        turn_deg(compensation_turn);
+    }
     
     ev3_pause(1);
     ev3_speak("Mission complete!");
@@ -289,7 +289,7 @@ function main(){
 }
 
 
-main();
+roll_forward(10);
 
 //Run code
 // ultrasonic_dist();
