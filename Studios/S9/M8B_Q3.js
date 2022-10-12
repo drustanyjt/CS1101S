@@ -249,7 +249,7 @@ function main(){
     // display(ev3_gyroSensorAngle(sensor_gyro)); // GYRO SENSOR
     
     while (ev3_colorSensorGetColor(sensor_colour) === BLACK) {
-        move_until(-200, () => ev3_colorSensorGetColor(sensor_colour) === WHITE || ev3_touchSensorPressed(sensor_touch),
+        move_until(-200, () => ev3_colorSensorGetColor(sensor_colour) === WHITE,
             () => null);
     
         roll_forward(compensation_dist);
@@ -258,10 +258,6 @@ function main(){
         }
         ev3_pause(5);
         turn_deg(-135);
-        
-        if (ev3_touchSensorPressed(sensor_touch)) {
-            return "Manual cut";
-        }
 
         turn_until(undefined, 1,
             () => ev3_colorSensorGetColor(sensor_colour) === BLACK || ev3_gyroSensorAngle(sensor_gyro) >= 270,
