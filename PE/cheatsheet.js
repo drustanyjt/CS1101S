@@ -34,3 +34,14 @@ function array_append(a, b) {
 }
 
 array_append(arr, arr);
+
+let num_stack = list();
+    
+function pop() {
+    const res = head(num_stack);
+    num_stack = tail(num_stack);
+    return res;
+}
+function push(n) {
+    num_stack = pair(n, num_stack);
+}
