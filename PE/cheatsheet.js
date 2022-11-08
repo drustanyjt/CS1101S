@@ -4,7 +4,7 @@ function xs_2_arr(xs) {
     let arr = [];
     function helper(xs) {
         if(is_null(xs)) {
-            return pair(arr, arrlen);
+            return [arr, arrlen];
         }
         arr[arrlen] = head(xs);
         arrlen = arrlen + 1;
@@ -16,8 +16,17 @@ function xs_2_arr(xs) {
 const xs_to_change = list(1, 2, 3, 4);
 
 const arr_arrlen = xs_2_arr(xs_to_change);
-const arr = head(arr_arrlen);
-const arrlen = tail(arr_arrlen);
+const arr = arr_arrlen[0];
+const arrlen = arr_arrlen[1];
+
+function arr_2_xs(arr) {
+    let xs = list();
+    let arrlen = array_length(arr);
+    for (let i = arrlen - 1; i >= 0; i = i - 1){
+        xs = pair(arr[i], xs);
+    }
+    return [xs, arrlen];
+}
 
 function array_append(a, b) {
     const len_b = array_length(b);
@@ -36,7 +45,7 @@ function array_append(a, b) {
 array_append(arr, arr);
 
 
-
+// stack
 function make_stack(){
     let stack = list();
     
@@ -55,6 +64,7 @@ const s_p_p = make_stack();
 s_p_p[2](2);
 s_p_p[1]();
 
+// queue
 function make_Q(){
     let queue = list();
     
@@ -74,3 +84,22 @@ const q_d_e = make_Q();
 q_d_e[2](2);
 display(q_d_e[0]());
 q_d_e[1]();
+
+arr_2_xs(xs_2_arr(list(1, 2, 3))[0]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
